@@ -5,8 +5,11 @@ export default StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: '#fff',
-      alignItems: 'center',
-      justifyContent: 'center',
+    },
+    safeArea:{
+      flex:1, 
+      paddingTop:45, 
+      backgroundColor:'#e4e8f5'
     },
     text: {
       color:'#fff',
