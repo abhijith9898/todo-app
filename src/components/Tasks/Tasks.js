@@ -11,7 +11,7 @@ export default function Tasks(props) {
             <Task/> */}
           <ScrollView>
             {props.tasks.map((task, index) => (
-                  <Task key={index} task={task} />
+                  <Task key={index} task={task} onStatusChange={props.onStatusChange} onTaskRemoval={props.onTaskRemoval} />
               )
             )}
           </ScrollView>
