@@ -3,6 +3,7 @@ import { Button, Switch, Text, TextInput, View } from 'react-native';
 import  styles  from './styles';
 import { useState } from 'react';
 import { Keyboard } from 'react-native';
+import * as database from '../../../src/database'
 
 export default function Form(props) {
 
@@ -10,10 +11,15 @@ export default function Form(props) {
   const [taskDone, setTaskDone] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
 
-  const handleAddPress = () => {
+  const handleAddPress = async () => {
     if (taskDescription) {
       console.log('Button pressed');
-      props.onAddTask(taskDescription, taskDone);
+      let addObj = {
+        description: taskDescription,
+        done: taskDone
+      }
+      const dataId = await database.save(addObj)
+      props.onAddTask(dataId, taskDescription, taskDone);
       setErrorMessage(null);
       setTaskDescription('');
       setTaskDone(false);

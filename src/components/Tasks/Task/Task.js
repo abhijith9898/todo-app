@@ -3,6 +3,7 @@ import { Text, View, Pressable, Modal, Switch, Alert } from 'react-native';
 import styles from './styles';
 import { useState } from 'react';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as database from '../../../../src/database'
 
 export default function Task(prop) {
   const [showModal, setShowModal] = useState(false);
@@ -11,8 +12,16 @@ export default function Task(prop) {
     setShowModal(!showModal);
   }
 
-  const handleStatusChangePress = () => {
-    prop.onStatusChange(prop.task.id);
+  const handleStatusChangePress = async () => {
+    const updated =  await database.update(prop.task.id, {done: !prop.task.done})
+    console.log("Updated", updated)
+    if(updated){
+      prop.onStatusChange(prop.task.id);
+    } else{
+      Alert.alert(
+        'Error',
+        'There was an error trying to update the database.');
+    }
   }
 
 
@@ -22,9 +31,15 @@ export default function Task(prop) {
       'This action will permanently delete this task. This action cannot be undone!',
       [{
         text: 'Confirm',
-        onPress: () => {
-          prop.onTaskRemoval(prop.task.id);
-          setShowModal(false);
+        onPress: async () => {
+          const deleted = await database.remove(prop.task.id)
+          console.log("Deleted", deleted)
+          if(deleted){
+            prop.onTaskRemoval(prop.task.id);
+            setShowModal(false);
+          } else{
+            Alert.alert('Error', 'There is some error deleting this data')
+          }
         }
       },
       {
