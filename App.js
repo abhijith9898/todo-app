@@ -1,67 +1,57 @@
 import { StatusBar } from 'expo-status-bar';
-import { Text, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import Header from './src/components/Header/Header';
 import Tasks from './src/components/Tasks/Tasks';
 import Form from './src/components/Form/Form';
 import  styles  from './src/styles/main';
 import uuid from 'react-uuid';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Entypo } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
-
+import * as database from './src/database'
 
 const Tab = createBottomTabNavigator();
 
 
 export default function App() {
+  const [tasks, setTasks] = useState([])
+  const [loadingData, setLoadingData] = useState(true)
 
-  const [tasks, setTasks] = useState(
-    [
-      {
-        id: uuid(),
-        description: "Walk the dog",
-        done: true
-      },
-      {
-        id: uuid(),
-        description: "Wash the car",
-        done: false
-      },
-      {
-        id: uuid(),
-        description: "Finish the lab",
-        done: false
-      },
-      {
-        id: uuid(),
-        description: "Walk the dog",
-        done: true
-      },
-      {
-        id: uuid(),
-        description: "Wash the car",
-        done: false
-      },
-      {
-        id: uuid(),
-        description: "Finish the lab",
-        done: false
-      },
-    ]
-  )
+  useEffect(()=>{
+    handleLoadTask()
+  },[])
 
-  const handleAddTask = (taskDescription, taskDone) => {
-    const updatedTasks = [...tasks];
-    updatedTasks.push(
-      {
-        id: uuid(),
-        description: taskDescription,
-        done: taskDone
+  const handleLoadTask = () => {
+    (async ()=>{
+      const updatedTasks = [...tasks];
+      const data =  await database.load()
+      setLoadingData(false)
+      if(data){
+        updatedTasks.push(
+          {
+            id: data.id,
+            description: data.description,
+            done: data.done
+          }
+        );
+        setTasks(data)
       }
-    );
-    setTasks(updatedTasks);
+    })()
+  }
+
+
+  const handleAddTask = (id, taskDescription, taskDone) => {
+      const updatedTasks = [...tasks];
+      updatedTasks.push(
+        {
+          id: id,
+          description: taskDescription,
+          done: taskDone
+        }
+      );
+      setTasks(updatedTasks);
   }
 
   const handleStatusChange = (id) => {
@@ -87,7 +77,7 @@ export default function App() {
       <View style={styles.container}>
         <StatusBar style="auto" />
         <Header />
-
+        {loadingData?(<ActivityIndicator size="large" color="#596796"/>):(<></>)}
         <Tab.Navigator screenOptions={{ headerShown: false }}>
           <Tab.Screen 
           name='List'
@@ -101,7 +91,7 @@ export default function App() {
             }
           }}>
             {(props) => (
-              <Tasks {...props} tasks={tasks} onStatusChange={handleStatusChange} onTaskRemoval={handleTaskRemoval}/>
+              <Tasks {...props} tasks={tasks} loadingData={loadingData} onStatusChange={handleStatusChange} onTaskRemoval={handleTaskRemoval}/>
             )}
           </Tab.Screen>
           <Tab.Screen 
