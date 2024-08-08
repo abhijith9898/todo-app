@@ -3,6 +3,7 @@ import { ActivityIndicator, Text, View } from 'react-native';
 import Header from './src/components/Header/Header';
 import Tasks from './src/components/Tasks/Tasks';
 import Form from './src/components/Form/Form';
+import Settings from './src/components/Settings/Settings';
 import  styles  from './src/styles/main';
 import uuid from 'react-uuid';
 import { useEffect, useState } from 'react';
@@ -10,10 +11,25 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Entypo } from '@expo/vector-icons';
 import { MaterialIcons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import * as database from './src/database'
+import * as Notifications from 'expo-notifications'
 
 const Tab = createBottomTabNavigator();
 
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true,
+    shouldPlaySound: true,
+    shouldSetBadge: true
+  }),
+  handleSuccess: (notificationId) => {
+    console.log('Handler Success:', notificationId)
+  },
+  handleError: (notificationId, error)=>{
+    console.log('Handler Error: ', error)
+  }
+});
 
 export default function App() {
   const [tasks, setTasks] = useState([])
@@ -106,6 +122,20 @@ export default function App() {
           }}>
             {(props) => (
               <Form {...props} onAddTask={handleAddTask} />
+            )}
+          </Tab.Screen>
+          <Tab.Screen 
+          name='Settings'
+          options={{
+            title:'Settings',
+            tabBarIcon:()=>{
+              return(
+                <Ionicons name="settings-outline" size={24} color="black" />
+              )
+            }
+          }}>
+            {(props) => (
+              <Settings/>
             )}
           </Tab.Screen>
         </Tab.Navigator>
